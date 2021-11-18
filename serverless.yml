@@ -1,0 +1,74 @@
+service: dev-node-rest-api-app
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  region: eu-west-1
+  profile: dev
+  timeout: 10
+  deploymentBucket:
+    blockPublicAccess: true 
+    skipPolicySetup: false 
+    name: ruan-serverless-${self:provider.region}-deploys
+
+#package:
+#  individually: true
+
+custom:
+  serverlessSsmFetch:
+    SECRET_NUMBER: /devops/dev/TEST~true
+
+functions:
+  getuser:
+    #handler: functions/users/handler.get
+    #handler: functions/getuserfunction.handler
+    handler: functions/users/get.fn
+    ssmToEnvironment:
+      - SECRET_NUMBER
+    events:
+      - http:
+          path: /users/get
+          method: get
+    package:
+      include:
+        - functions/users/**
+        #- functions/node_modules/RequireModule1
+  deleteuser:
+    handler: functions/users/delete.fn
+    events:
+      - http:
+          path: /users/delete
+          method: get
+    package:
+      include:
+        - functions/users/**
+  gologin:
+    handler: functions/accounts/login.fn
+    events:
+      - http:
+          path: /account/login
+          method: get
+    package:
+      include:
+        - functions/accounts/**
+  gologout:
+    handler: functions/accounts/logout.fn
+    events:
+      - http:
+          path: /accounts/logout
+          method: get
+    package:
+      include:
+        - functions/accounts/**
+  goregister:
+    handler: functions/accounts/register.fn
+    events:
+      - http:
+          path: /accounts/register
+          method: get
+    package:
+      include:
+        - functions/accounts/**
+
+plugins:
+  - serverless-ssm-fetch
